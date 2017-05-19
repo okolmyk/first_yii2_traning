@@ -1,0 +1,137 @@
+<?php
+namespace app\commands;
+ 
+use Yii;
+use yii\console\Controller;
+use \app\rbac\UserGroupRule;
+use app\models\Users;
+use \app\rbac\UserProfileOwnerRule;
+
+
+class RbacController extends Controller
+{
+    
+    
+    
+    public function actionInit()
+    {
+        $authManager = \Yii::$app->authManager;
+		$authManager->removeAll();
+		
+        // Create roles
+        $guest  = $authManager->createRole('guest');
+        $brand  = $authManager->createRole('BRAND');
+        $talent = $authManager->createRole('TALENT');
+        $admin  = $authManager->createRole('admin');
+ 
+        // Create simple, based on action{$NAME} permissions
+        $login  = $authManager->createPermission('login');
+        $logout = $authManager->createPermission('logout');
+        $error  = $authManager->createPermission('error');
+        $signUp = $authManager->createPermission('sign-up');
+        $index  = $authManager->createPermission('index');
+        $view   = $authManager->createPermission('view');
+        $update = $authManager->createPermission('update');
+        $delete = $authManager->createPermission('delete');
+        //+
+        $createProduct = $authManager->createPermission('createProduct');
+ 
+        // Add permissions in Yii::$app->authManager
+        $authManager->add($login);
+        $authManager->add($logout);
+        $authManager->add($error);
+        $authManager->add($signUp);
+        $authManager->add($index);
+        $authManager->add($view);
+        $authManager->add($update);
+        $authManager->add($delete);
+        //+
+        $authManager->add($createProduct);
+ 
+ 
+        // Add rule, based on UserExt->group === $user->group
+        //$userGroupRule = new UserGroupRule();
+        //$authManager->add($userGroupRule);
+ 
+        // Add rule "UserGroupRule" in roles
+        /*
+        $guest->ruleName  = $userGroupRule->name;
+        $brand->ruleName  = $userGroupRule->name;
+        $talent->ruleName = $userGroupRule->name;
+        $admin->ruleName  = $userGroupRule->name;
+        */
+ 
+        // Add roles in Yii::$app->authManager
+        $authManager->add($guest);
+        $authManager->add($brand);
+        $authManager->add($talent);
+        $authManager->add($admin);
+ 
+        // Add permission-per-role in Yii::$app->authManager
+        // Guest
+        $authManager->addChild($guest, $login);
+        $authManager->addChild($guest, $logout);
+        $authManager->addChild($guest, $error);
+        $authManager->addChild($guest, $signUp);
+        $authManager->addChild($guest, $index);
+        $authManager->addChild($guest, $view);
+ 
+        // BRAND
+        $authManager->addChild($brand, $update); 
+        $authManager->addChild($brand, $guest);
+        $authManager->addChild($brand, $createProduct);
+ 
+        // TALENT
+        $authManager->addChild($talent, $update);
+        $authManager->addChild($talent, $guest);
+ 
+        // Admin
+        $authManager->addChild($admin, $delete);
+        $authManager->addChild($admin, $talent);
+        $authManager->addChild($admin, $brand);
+        
+        $authManager->assign($admin, 1);
+        $authManager->assign($brand, 2);
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /*public function actionInit()
+    {
+        $auth = Yii::$app->getAuthManager();
+        $auth->removeAll();
+        
+        $user = $auth->createRole('user');
+        $auth->add($user);
+        
+        $admin = $auth->createRole('admin');
+        $auth->add($admin);
+        
+        $auth->addChild($admin, $user);
+        $this->stdout('Done!' . PHP_EOL);
+    }
+    
+    public function actionTest(){
+			
+		Yii::$app->set('request', new \yii\web\Request());
+		
+		$user = new User(['id' => 1, 'username' => 'User']);
+		
+		Yii::$app->user->login($user);
+		
+		var_dump(Yii::$app->user);
+	}*/
+    
+}
+
